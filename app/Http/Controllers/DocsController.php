@@ -135,4 +135,46 @@ class DocsController extends Controller
             'url' => Storage::url($path),
         ], 200);
     }
+
+    // WEB
+    public function uploadDocsWeb(Request $request)
+    {
+        // Valida el archivo
+        $request->validate([
+            'file' => 'required|file|mimes:pdf,doc,docx,txt|max:10240',
+            'folio' => 'required|string|unique:files,folio',
+        ], [
+            'file.required' => 'Es necesario agregar un archivo.',
+            'file.file' => 'El archivo debe ser un archivo válido.',
+            'file.mimes' => 'El archivo debe ser de tipo: pdf, doc, docx o txt.',
+            'file.max' => 'El archivo no debe superar los 10MB.',
+            'folio.required' => 'El folio es necesario.',
+            'folio.string' => 'El folio debe ser una cadena de texto.',
+            'folio.unique' => 'El folio ya existe en nuestros registros.',
+        ]);
+
+        // Obtener el archivo del request
+        $file = $request->file('file');
+
+        // Definir el nombre del archivo
+        $fileName = uniqid() . '_' . $file->getClientOriginalName();
+
+        // Guardar el archivo en el storage bajo la carpeta 'uploads'
+        $path = $file->storeAs('archivos/'.$request->folio , $fileName, 'public');
+
+        File::create([
+            'user_id' => Auth::user()->id,
+            'file_name' => $fileName,
+            'file_path' => $path,
+            'file_type' => $file->getMimeType(),
+            'folio' => $request->folio,
+        ]);
+
+        // Retornar respuesta con información del archivo
+        return response()->json([
+            'message' => 'Archivo subido exitosamente',
+            'path' => $path,
+            'url' => Storage::url($path),
+        ], 200);
+    }
 }
