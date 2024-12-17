@@ -40,6 +40,7 @@ class DocsController extends Controller
             'file_path' => $path,
             'file_type' => $file->getMimeType(),
             'folio' => $request->folio,
+            'tipo' => 'ORIGINAL',
         ]);
 
         // Retornar respuesta con información del archivo
@@ -71,10 +72,10 @@ class DocsController extends Controller
         ], 200);
     }
 
-    public function getFile($folio)
+    public function getFile($folio, $tipo = 'ORIGINAL')
     {
         // Buscar el archivo en la base de datos
-        $file = File::where('folio', $folio)->first();
+        $file = File::where('folio', $folio)->where('tipo', $tipo)->first();
 
         if (!$file) {
             return response()->json(['message' => 'Archivo no encontrado'], 404);
@@ -103,6 +104,12 @@ class DocsController extends Controller
             'folio.exists' => 'El folio proporcionado no existe en nuestros registros.',
         ]);
 
+        // Validar si ya existe un archivo procesado
+        $fileRecordExists = File::where('folio', $request->folio)->where('tipo', 'PROCESADO')->exists();
+        if ($fileRecordExists) {
+            return response()->json(['error' => 'Ya existe un archivo procesado ligado al folio.'], 422);
+        }
+
         // Recuperar el registro asociado al folio
         $fileRecord = File::where('folio', $request->folio)->first();
         // Verificar el tipo MIME del archivo
@@ -126,6 +133,7 @@ class DocsController extends Controller
             'file_path' => $path,
             'file_type' => $file->getMimeType(),
             'folio' => $request->folio,
+            'tipo' => 'PROCESADO',
         ]);
 
         // Retornar respuesta con información del archivo
@@ -168,6 +176,7 @@ class DocsController extends Controller
             'file_path' => $path,
             'file_type' => $file->getMimeType(),
             'folio' => $request->folio,
+            'tipo' => 'ORIGINAL',
         ]);
 
         // Retornar respuesta con información del archivo

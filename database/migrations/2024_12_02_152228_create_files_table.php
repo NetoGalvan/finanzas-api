@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->string('folio');
+            $table->enum('tipo', ["ORIGINAL", "PROCESADO"]);
             $table->string('file_name');
             $table->string('file_path');
             $table->string('file_type')->nullable();

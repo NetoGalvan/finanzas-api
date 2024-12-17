@@ -12,6 +12,7 @@ class File extends Model
     protected $fillable = [
         'user_id',
         'folio',
+        'tipo',
         'file_name',
         'file_path',
         'file_type',
